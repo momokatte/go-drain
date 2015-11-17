@@ -6,6 +6,7 @@ package drain
 
 import (
 	"bufio"
+	"io"
 	"os"
 )
 
@@ -18,8 +19,8 @@ func FileLinesToChan(fileName string, dest chan<- string) error {
 // Scans all tokens from a File into a channel until EOF
 //
 func FileToChan(fileName string, split bufio.SplitFunc, dest chan<- string) (err error) {
-	f, err := os.Open(fileName)
-	if err != nil {
+	var f io.ReadCloser
+	if f, err = os.Open(fileName); err != nil {
 		return
 	}
 	defer f.Close()
@@ -38,8 +39,8 @@ func ChanToFile(source <-chan string, fileName string) error {
 // The file will be overwritten if it already exists, or created if it does not.
 //
 func ChanToFileSize(source <-chan string, bufSize int, fileName string) (err error) {
-	f, err := os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
-	if err != nil {
+	var f io.WriteCloser
+	if f, err = os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC|os.O_APPEND, 0666); err != nil {
 		return
 	}
 	defer f.Close()

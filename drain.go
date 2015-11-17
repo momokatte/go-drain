@@ -37,11 +37,11 @@ func ScannerToChan(s *bufio.Scanner, dest chan<- string) error {
 //
 func ChanToWriter(source <-chan string, separator string, w io.Writer) (err error) {
 	for s := range source {
-		for _, err = io.WriteString(w, s); err != nil; {
+		if _, err = io.WriteString(w, s); err != nil {
 			return
 		}
 		if len(separator) > 0 {
-			for _, err = io.WriteString(w, separator); err != nil; {
+			if _, err = io.WriteString(w, separator); err != nil {
 				return
 			}
 		}
@@ -58,17 +58,17 @@ func ChanToWriter(source <-chan string, separator string, w io.Writer) (err erro
 //
 func ChanToBufioWriter(source <-chan string, separator string, bw *bufio.Writer) (err error) {
 	for s := range source {
-		for _, err = bw.WriteString(s); err != nil; {
+		if _, err = bw.WriteString(s); err != nil {
 			return
 		}
 		if len(separator) > 0 {
-			for _, err = bw.WriteString(separator); err != nil; {
+			if _, err = bw.WriteString(separator); err != nil {
 				return
 			}
 		}
 		if len(source) == 0 {
 			// we don't know when the next string will come in, so flush and yield
-			for err = bw.Flush(); err != nil; {
+			if err = bw.Flush(); err != nil {
 				return
 			}
 			runtime.Gosched()
