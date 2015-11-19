@@ -11,30 +11,34 @@ import (
 func TestReaderLinesToChan(t *testing.T) {
 	r := strings.NewReader("a b c d e\nf g h i j\n")
 	c := make(chan string, 2)
+
 	ReaderToChan(r, bufio.ScanLines, c)
-	if line := <-c; line != "a b c d e" {
-		t.FailNow()
+
+	expectedLines := []string{"a b c d e", "f g h i j"}
+	for i, expected := range expectedLines {
+		if actual := <-c; expected != actual {
+			t.Errorf("Expected '%s' at index %d, got '%s'", expected, i, actual)
+		}
 	}
-	if line := <-c; line != "f g h i j" {
-		t.FailNow()
-	}
-	if len(c) != 0 {
-		t.FailNow()
+	if l := len(c); l != 0 {
+		t.Errorf("Expected empty channel, got length %d", l)
 	}
 }
 
 func TestReaderWordsToChan(t *testing.T) {
 	r := strings.NewReader("a b c\nd e f \n g h  i j")
 	c := make(chan string, 10)
+
 	ReaderToChan(r, bufio.ScanWords, c)
+
 	expectedWords := []string{"a", "b", "c", "d", "e", "f", "g", "h", "i", "j"}
-	for i := 0; i < len(expectedWords); i++ {
-		if word := <-c; word != expectedWords[i] {
-			t.FailNow()
+	for i, expected := range expectedWords {
+		if actual := <-c; expected != actual {
+			t.Errorf("Expected '%s' at index %d, got '%s'", expected, i, actual)
 		}
 	}
-	if len(c) != 0 {
-		t.FailNow()
+	if l := len(c); l != 0 {
+		t.Errorf("Expected empty channel, got length %d", l)
 	}
 }
 
@@ -47,9 +51,12 @@ func TestChanToWriter(t *testing.T) {
 		close(c)
 	}()
 	w := new(bytes.Buffer)
+
 	ChanToWriter(c, ".", w)
-	if w.String() != "a.b.c.d.e.f.g.h.i.j." {
-		t.FailNow()
+
+	expected := "a.b.c.d.e.f.g.h.i.j."
+	if actual := w.String(); expected != actual {
+		t.Errorf("Expected '%s', got '%s'", expected, actual)
 	}
 }
 
@@ -63,9 +70,12 @@ func TestChanToBufioWriter(t *testing.T) {
 	}()
 	w := new(bytes.Buffer)
 	bw := bufio.NewWriterSize(w, 10)
+
 	ChanToBufioWriter(c, ".", bw)
-	if w.String() != "a.b.c.d.e.f.g.h.i.j." {
-		t.FailNow()
+
+	expected := "a.b.c.d.e.f.g.h.i.j."
+	if actual := w.String(); expected != actual {
+		t.Errorf("Expected '%s', got '%s'", expected, actual)
 	}
 }
 
