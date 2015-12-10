@@ -36,11 +36,11 @@ func ChanToFile(source <-chan string, fileName string) error {
 }
 
 // Writes all strings from a channel to a File, with trailing newline characters, until the channel is closed.
-// The file will be overwritten if it already exists, or created if it does not.
+// The file will be created if it does not exist, and appended to if it already exists.
 //
 func ChanToFileSize(source <-chan string, bufSize int, fileName string) (err error) {
 	var f io.WriteCloser
-	if f, err = os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC|os.O_APPEND, 0666); err != nil {
+	if f, err = os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0664); err != nil {
 		return
 	}
 	defer f.Close()
